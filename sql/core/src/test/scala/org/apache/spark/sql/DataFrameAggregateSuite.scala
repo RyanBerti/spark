@@ -1538,6 +1538,23 @@ class DataFrameAggregateSuite extends QueryTest
     )
     checkAnswer(res, Row(1, 1, 1) :: Row(4, 1, 2) :: Nil)
   }
+
+  test("SPARK-16484: hllsketch_eval positive tests") {
+    val df1 = Seq(
+      (1, "a"), (1, "a"), (1, "a"),
+      (1, "b"),
+      (1, "c"), (1, "c"),
+      (1, "d")
+    ).toDF("id", "value")
+
+    val res1 = df1.groupBy(col("id"))
+      .agg(
+        count("value").as("count"),
+        hllsketch_eval("value").as("distinct_count")
+      )
+
+    checkAnswer(res1, Row(1, 7, 4))
+  }
 }
 
 case class B(c: Option[Double])
