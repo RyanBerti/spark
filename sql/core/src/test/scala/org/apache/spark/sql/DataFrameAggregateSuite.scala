@@ -1539,7 +1539,7 @@ class DataFrameAggregateSuite extends QueryTest
     checkAnswer(res, Row(1, 1, 1) :: Row(4, 1, 2) :: Nil)
   }
 
-  test("SPARK-16484: hllsketch_eval positive tests") {
+  test("SPARK-16484: hllsketch_estimate positive tests") {
     val df1 = Seq(
       (1, "a"), (1, "a"), (1, "a"),
       (1, "b"),
@@ -1547,13 +1547,49 @@ class DataFrameAggregateSuite extends QueryTest
       (1, "d")
     ).toDF("id", "value")
 
+    val df2 = Seq(
+      (1, "a"),
+      (1, "c"),
+      (1, "d"), (1, "d"), (1, "d"),
+      (1, "e"), (1, "e"),
+      (1, "f")
+    ).toDF("id", "value")
+
     val res1 = df1.groupBy(col("id"))
       .agg(
         count("value").as("count"),
-        hllsketch_eval("value").as("distinct_count")
+        hllsketch_estimate("value").as("distinct_count")
       )
 
     checkAnswer(res1, Row(1, 7, 4))
+
+    // Just shows 'off heap' implementation also works
+    val res2 = df1.groupBy(col("id"))
+      .agg(
+        count("value").as("count"),
+        hllsketch_estimate(Column("value"), 12, "HLL_4", false).as("distinct_count")
+      )
+
+    checkAnswer(res2, Row(1, 7, 4))
+
+    val df3 = df1.groupBy(col("id"))
+      .agg(
+        count("value").as("count"),
+        hllsketch_binary("value").as("hll_sketch")
+      )
+
+    val df4 = df2.groupBy(col("id"))
+      .agg(
+        count("value").as("count"),
+        hllsketch_binary("value").as("hll_sketch")
+      )
+
+    val res3 = df3.union(df4).groupBy(col("id")).agg(
+      sum("count").as("count"),
+      hllsketch_binary_estimate("hll_sketch").as("distinct_count")
+    )
+
+    checkAnswer(res3, Row(1, 15, 6))
   }
 }
 

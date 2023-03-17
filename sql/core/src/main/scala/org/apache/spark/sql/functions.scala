@@ -314,10 +314,13 @@ object functions {
    * @group agg_funcs
    * @since 3.2.1
    */
-  def hllsketch_eval(e: Column): Column = withAggregateFunction {
-    DatasketchesHllSketch(e.expr)
+  def hllsketch_estimate(
+    e: Column,
+    lgConfigK: Int,
+    tgtHllType: String,
+    useHeap: Boolean): Column = withAggregateFunction {
+    HllSketchEstimate(e.expr, lgConfigK, tgtHllType, useHeap)
   }
-
 
   /**
    * Aggregate function: returns the approximate number of distinct items in a group,
@@ -326,8 +329,92 @@ object functions {
    * @group agg_funcs
    * @since 3.2.1
    */
-  def hllsketch_eval(columnName: String): Column = {
-    hllsketch_eval(Column(columnName))
+  def hllsketch_estimate(e: Column): Column = withAggregateFunction {
+    HllSketchEstimate(e.expr)
+  }
+
+  /**
+   * Aggregate function: returns the approximate number of distinct items in a group,
+   * using a Datasketches HllSketch instance with default configuration.
+   *
+   * @group agg_funcs
+   * @since 3.2.1
+   */
+  def hllsketch_estimate(columnName: String): Column = {
+    hllsketch_estimate(Column(columnName))
+  }
+
+  /**
+   * Aggregate function: returns the approximate number of distinct items in a group,
+   * using a Datasketches HllSketch instance with default configuration.
+   *
+   * @group agg_funcs
+   * @since 3.2.1
+   */
+  def hllsketch_binary(
+    e: Column,
+    lgConfigK: Int,
+    tgtHllType: String,
+    useHeap: Boolean): Column = withAggregateFunction {
+    HllSketchBinary(e.expr, lgConfigK, tgtHllType, useHeap)
+  }
+
+  /**
+   * Aggregate function: returns the approximate number of distinct items in a group,
+   * using a Datasketches HllSketch instance with default configuration.
+   *
+   * @group agg_funcs
+   * @since 3.2.1
+   */
+  def hllsketch_binary(e: Column): Column = withAggregateFunction {
+    HllSketchBinary(e.expr)
+  }
+
+  /**
+   * Aggregate function: returns the approximate number of distinct items in a group,
+   * using a Datasketches HllSketch instance with default configuration.
+   *
+   * @group agg_funcs
+   * @since 3.2.1
+   */
+  def hllsketch_binary(columnName: String): Column = {
+    hllsketch_binary(Column(columnName))
+  }
+
+  /**
+   * Aggregate function: returns the approximate number of distinct items in a group,
+   * using a Datasketches HllSketch instance with default configuration.
+   *
+   * @group agg_funcs
+   * @since 3.2.1
+   */
+  def hllsketch_binary_estimate(
+    e: Column,
+    lgMaxK: Int,
+    useHeap: Boolean): Column = withAggregateFunction {
+    HllSketchBinaryEstimate(e.expr, lgMaxK, useHeap)
+  }
+
+  /**
+   * Aggregate function: returns the approximate number of distinct items in a group,
+   * using a Datasketches HllSketch instance with default configuration.
+   *
+   * @group agg_funcs
+   * @since 3.2.1
+   */
+  def hllsketch_binary_estimate(e: Column): Column = withAggregateFunction {
+    HllSketchBinaryEstimate(e.expr)
+  }
+
+  /**
+   * Aggregate function: returns the approximate number of distinct items in a group,
+   * using a Datasketches HllSketch instance with default configuration.
+   *
+   * @group agg_funcs
+   * @since 3.2.1
+   */
+  def hllsketch_binary_estimate(columnName: String): Column = {
+    hllsketch_binary_estimate(Column(columnName))
   }
 
   /**
